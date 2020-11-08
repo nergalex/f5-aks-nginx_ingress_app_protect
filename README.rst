@@ -11,11 +11,12 @@ Use Case
 - **Automation** -- Automate use cases:
 
 A) [DevOps] **Deploy Infrastructure** -- DevOps deploy K8S Ingress with an embedded WAF
-B) [SecOps] **Deploy Security objects** -- SecOps deploy security objects (Secret/ SSL key pair, WAF policies)
+B) [SecOps] **Deploy Security objects** -- SecOps deploy security objects (NGINX Ingress Controller, Secret/SSL key pair, WAF policies)
 C) [DevOps] **Publish an Application** -- DevOps deploy Applications by selecting a pre-defined security level
 D) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
 E) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
 F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
+G) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
 
 Benefit
 ###############
@@ -37,7 +38,6 @@ In this demo, functional components in the data path between Application code an
 - **+-- Weakness in code**: Following awareness of OWASP foundation for `Web app <https://owasp.org/www-project-top-ten/>`_ and `API app <https://owasp.org/www-project-api-security/>`_, raise protection to `prevent from hacking actions <http://veriscommunity.net/enums.html#section-actions>`_
 - **+-- Threat Campaign**: Because patient zero are honey pots, obtain associated attack signatures against 0-day from `Application Threat Intelligence <https://www.f5.com/labs/application-protection>`_
 - **K8S Ingress / Content routing** -- Route and load balance traffic to PODs hosted on Kubernetes
-
 
 .. figure:: _figures/NIC_functionnal_view.png
 
@@ -127,7 +127,7 @@ Credential
 ***************************
 - Create a Service Principal on Azure following `this guide <https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app>`_
 - Create a Microsoft Azure Resource Manager following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/credentials.html#microsoft-azure-resource-manager>`_
-- Create Credentials for Jumphost tasks following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/credentials.html#machine>`_
+- Create Credentials ``cred_jumphost`` for Jumphost tasks following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/credentials.html#machine>`_
 
 =====================================================   =============================================   =============================================   =============================================   =============================================
 REDENTIAL TYPE                                          USERNAME                                        SSH PRIVATE KEY                                 SIGNED SSH CERTIFICATE                          PRIVILEGE ESCALATION METHOD
@@ -165,10 +165,6 @@ Ansible role structure
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
 
-
-
-
-
 A) [DevOps] Deploy Infrastructure
 ==================================================
 Create and launch a workflow template ``wf-aks-create-infra`` that includes those Job templates in this order:
@@ -177,9 +173,9 @@ Create and launch a workflow template ``wf-aks-create-infra`` that includes thos
 Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 ``poc-azure_create-spoke-aks``                                  Create Ressource Group and vNet                     ``playbooks/poc-azure.yaml``                    ``create-spoke-aks``                                                                                                                            ``my_azure_credential``
-``poc-aks_create-registry``                                     Create ACR                                          ``playbooks/poc-aks.yaml``                      ``create-registry``                                                                                                                            ``my_azure_credential``
-``poc-aks_create-cluster``                                      Create AKS                                          ``playbooks/poc-aks.yaml``                      ``create-cluster``                                                                                                                            ``my_azure_credential``
-``poc-azure_create-vm-jumphost``                                Create Jumphost                                     ``playbooks/poc-azure.yaml``                    ``create-vm-jumphost``                                                                                                                            ``my_azure_credential``
+``poc-aks_create-registry``                                     Create ACR                                          ``playbooks/poc-aks.yaml``                      ``create-registry``                                                                                                                             ``my_azure_credential``
+``poc-aks_create-cluster``                                      Create AKS                                          ``playbooks/poc-aks.yaml``                      ``create-cluster``                                                                                                                              ``my_azure_credential``
+``poc-azure_create-vm-jumphost``                                Create Jumphost                                     ``playbooks/poc-azure.yaml``                    ``create-vm-jumphost``                                                                                                                          ``my_azure_credential``
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================   ================================================================================================================================================================================================================
@@ -206,7 +202,6 @@ Extra variable                                  Description                     
 
 ``extra_jumphost`` structure:
 
-
 .. code:: yaml
 
     extra_jumphost:
@@ -217,86 +212,55 @@ Extra variable                                  Description                     
         - '10.0.0.0/8'
       ssh_crt: "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----"
 
-
-B) [SecOps] Attach a specific WAF policy to an Application
+B) [SecOps] Deploy Security objects
 ==================================================
-Create and launch a job template ``poc-consul_nap-server_name_create``:
+Pre-requisites
+###############################
+NGINX licence
+***************************
+Download your NGINX+ licence files ``nginx-repo.crt`` and ``nginx-repo.key`` to your private repository ``/playbooks/roles/poc-k8s/files/``
 
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-``poc-consul_nap-server_name_create``                           Update Consul key/value store                       ``playbooks/poc-consul_agent.yaml``             ``nap-server_name_create``                      ``localhost``
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+AKS - kubeconfig
+***************************
+- Connect to Azure console
+- Download your kubeconfig file ``~/.kube/config`` to your private repository ``/playbooks/roles/poc-k8s/files/config.yaml``
 
-==============================================  =============================================   ================================================================================================================================================================================================================
-Extra variable                                  Description                                     Example
-==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_consul_path_source_of_truth``           Consul key path                                 ``poc_f5/inbound/nap``
-``extra_consul_agent_ip``                       Consul server IP                                ``10.100.0.60``
-``extra_consul_agent_port``                     Consul server port                              ``8500``
-``extra_consul_agent_scheme``                   Consul server scheme                            ``http``
-``extra_consul_datacenter``                     Consul datacenter                               ``Inbound``
-``extra_server_name``                           FQDN = NGINX CTRL Gateway::Hostname record      ``my-app.f5cloudbuilder.dev``
-``extra_server_properties``                     WAF policy properties                           ``{'waf_policy': 'secure_high-server_bundle1.json', 'enable': 'on'}``
-==============================================  =============================================   ================================================================================================================================================================================================================
+.. figure:: _figures/kube_config_file.png
 
+ACR - token
+***************************
+- Connect to Azure console
+- Get a repository ``accessToken`` to be authorized to push NGINX Controller image to ACR
 
-C) [SecOps] Update WAF policies
-==================================================
+.. code:: bash
+
+    $ az aks get-credentials --resource-group rg-<platform_name> --name CloudBuilder
+
 Workflow
-##############
-Create and launch a workflow template ``wf-nginx_managed-nap_update_waf_policy`` that includes those Job templates in this order:
+###############################
+Create and launch a workflow template ``wf-k8s-create-ingress-controller`` that includes those Job templates in this order:
 
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-``poc-nginx_controller-login``                                  GET authentication token                            ``playbooks/poc-nginx_controller.yaml``         ``login``                                       ``localhost``                                   ``localhost``
-``poc-nginx_controller-create_environment``                     Create an environment                               ``playbooks/poc-nginx_controller.yaml``         ``create_environment``                          ``localhost``                                   ``localhost``
-``poc-azure_get-vmss-facts-credential_set``                     Get info of NGINX VMSS                              ``playbooks/poc-azure.yaml``                    ``get-vmss-facts``                              ``my_project``                                  ``localhost``                                   ``my_azure_credential``
-``poc-nginx_controller-create_gw_app_component_vmss_north``     Create App on North GW / WAF                        ``playbooks/poc-nginx_controller.yaml``         ``create_gw_app_component_vmss_north``          `localhost``                                    ``localhost``
-``wf-nginx_managed-nap_update_waf_policy``                      Apply WAF policies                                  ``workflow`` see use case (C)
+``poc-aks_get-registry_info``                                   Get login_server info                               ``playbooks/poc-aks.yaml``                      ``get-registry_info``                                                                                                                           ``my_azure_credential``
+``poc-azure_get-vm-jumphost``                                   Get FQDN jumphost info                              ``playbooks/poc-azure.yaml``                    ``get-vm-jumphost``                                                                                                                             ``my_azure_credential``
+``poc-k8s-create_nginx_ic_image``                               Build and push NGINX IC + App Protect               ``playbooks/poc-k8s_jumphost.yaml``             ``create_nginx_ic_image``                       localhost                                                                                       ``cred_jumphost``
+``poc-k8s-deploy_nginx_ic``                                     Create or update Ingress container instances        ``playbooks/poc-k8s.yaml``                      ``deploy_nginx_ic``                             localhost
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================   ================================================================================================================================================================================================================
 Extra variable                                  Description                                     Example
 ==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_vmss_name``                             NGINX VMSS name                                 ``myWAFcluster``
-``extra_platform_name``                         Consul DataCenter name                          ``Inbound``
-``extra_app_protect_monitor_ip``                Remote syslog server IP (Kibana, SIEM...)       ``10.0.0.20``
-``extra_app_protect_monitor_port``              Remote syslog server port (Kibana, SIEM...)     ``5144``
-``extra_nap_repo``                              WAF policy repo managed by SecOps               ``https://github.com/nergalex/f5-nap-policies.git``
-``extra_consul_path_source_of_truth``           Consul key path                                 ``poc_f5/inbound/nap``
-``extra_consul_path_lookup``                    Consul key | server names to protect            ``server_names``
-``extra_consul_agent_ip``                       Consul server IP                                ``10.100.0.60``
-``extra_consul_agent_port``                     Consul server port                              ``8500``
-``extra_consul_agent_scheme``                   Consul server scheme                            ``http``
-``extra_consul_datacenter``                     Consul datacenter                               ``Inbound``
-``extra_app``                                   App specification                               see below
+``extra_platform_name``                         name used for resource group, vNet...           ``aksdistrict``
+``extra_nginx_ic_version``                      NGINX Ingress Controller version                ``1.9.0``
+``extra_ilb_ingress_ip``                        Azure ILB VIP for Internal Ingress              ``eastus2``
+``extra_jumphost``                              Dict / properties of jumphost                   see below
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
-Webhook
-##############
-`configuration guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html#github-webhook-setup>`_
+``extra_jumphost`` structure:
 
-E) [SecOps] Remove a specific WAF policy from an Application
-==================================================
-Create and launch a job template ``poc-consul_nap-server_name_delete``:
+.. code:: yaml
 
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-``poc-consul_nap-server_name_delete``                           Remove Consul key/value store                       ``playbooks/poc-consul_agent.yaml``             ``nap-server_name_delete``                      ``localhost``
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-
-==============================================  =============================================   ================================================================================================================================================================================================================
-Extra variable                                  Description                                     Example
-==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_consul_path_source_of_truth``           Consul key path                                 ``poc_f5/inbound/nap``
-``extra_consul_agent_ip``                       Consul server IP                                ``10.100.0.60``
-``extra_consul_agent_port``                     Consul server port                              ``8500``
-``extra_consul_agent_scheme``                   Consul server scheme                            ``http``
-``extra_consul_datacenter``                     Consul datacenter                               ``Inbound``
-``extra_server_name``                           FQDN = NGINX CTRL Gateway::Hostname record      ``my-app.f5cloudbuilder.dev``
-``extra_server_properties``                     WAF policy properties                           ``{'waf_policy': 'secure_high-server_bundle1.json', 'enable': 'on'}``
-==============================================  =============================================   ================================================================================================================================================================================================================
-
+    extra_jumphost:
+      name: jumphost
