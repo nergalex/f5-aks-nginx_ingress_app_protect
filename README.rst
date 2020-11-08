@@ -142,10 +142,10 @@ Webhook
 
 Ansible role structure
 ######################
-- Deployment is based on ``workflow template``. Example: ``workflow template`` = ``wf-create_create_edge_security_inbound`` ;
-- A ``workflow template`` includes multiple ``job template``. Example: ``job template`` = ``poc-azure_create_hub_edge_security_inbound``
-- A ``job template`` have an associated ``playbook``. Example: ``playbook`` = ``playbooks/poc-azure.yaml``
-- A ``playbook`` launch a ``play`` in a ``role``. Example: ``role`` = ``poc-azure``
+- Deployment is based on ``workflow template``. Example: ``workflow template`` = ``wf-create_create_edge_security_inbound``
+- ``workflow template`` includes multiple ``job template``. Example: ``job template`` = ``poc-azure_create_hub_edge_security_inbound``
+- ``job template`` have an associated ``playbook``. Example: ``playbook`` = ``playbooks/poc-azure.yaml``
+- ``playbook`` launch a ``play`` in a ``role``. Example: ``role`` = ``poc-azure``
 
 .. code:: yaml
 
@@ -154,7 +154,7 @@ Ansible role structure
       roles:
         - role: poc-azure
 
-- A ``play`` is an ``extra variable`` named ``activity`` and set in each ``job template``. Example: ``create_hub_edge_security_inbound``
+- ``play`` is an ``extra variable`` named ``activity`` and set in each ``job template``. Example: ``create_hub_edge_security_inbound``
 - The specified ``play`` (or ``activity``) is launched by the ``main.yaml`` task located in the role ``tasks/main.yaml``
 
 .. code:: yaml
