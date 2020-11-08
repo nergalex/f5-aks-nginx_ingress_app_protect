@@ -201,7 +201,7 @@ Extra variable                                  Description                     
 ``extra_app_vm_size``                           K8S VMSS / node VM size                         ``Standard_DS1_v2``
 ``extra_sp_client_id``                          Service Principal / client ID                   ``<UUID>>``
 ``extra_sp_client_secret``                      Service Principal / client Secret               ``...``
-``extra_jumphost``                              Dict / properties of jumphost                   ``...``
+``extra_jumphost``                              Dict / properties of jumphost                   see below
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 ``extra_jumphost`` structure:
@@ -214,7 +214,7 @@ extra_jumphost:
   private_ip: 10.13.0.10
   acl_src_ips:
     - '10.0.0.0/8'
-  ssh_crt: -----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----
+  ssh_crt: "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----"
 
 
 B) [SecOps] Attach a specific WAF policy to an Application
