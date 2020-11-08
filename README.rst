@@ -78,9 +78,9 @@ WAF policy structure
 - **Core**: A core policy includes:
 - **Modification**: Contains a list of changes to express exceptions to the intended policy. These exceptions are usually the result of fixing false positive incidents and failures in tests applied to those policies. These changes are more frequent than the Core policy.
 
-More details `here <https://docs.nginx.com/nginx-app-protect/configuration/#policy-authoring-and-tuning>`_.
-
 .. figure:: _figures/NIC_waf_policy_structure.png
+
+More details `here <https://docs.nginx.com/nginx-app-protect/configuration/#policy-authoring-and-tuning>`_.
 
 Demo
 ###############
@@ -169,58 +169,52 @@ Ansible role structure
 
 
 
-A) [DevOps] Deploy an Application
+A) [DevOps] Deploy Infrastructure
 ==================================================
-Create and launch a workflow template ``wf-create-app_inbound_nginx_controller_nap`` that includes those Job templates in this order:
+Create and launch a workflow template ``wf-aks-create-infra`` that includes those Job templates in this order:
 
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-``poc-nginx_controller-login``                                  GET authentication token                            ``playbooks/poc-nginx_controller.yaml``         ``login``                                       ``localhost``                                   ``localhost``
-``poc-nginx_controller-create_environment``                     Create an environment                               ``playbooks/poc-nginx_controller.yaml``         ``create_environment``                          ``localhost``                                   ``localhost``
-``poc-azure_get-vmss-facts-credential_set``                     Get info of NGINX VMSS                              ``playbooks/poc-azure.yaml``                    ``get-vmss-facts``                              ``my_project``                                  ``localhost``                                   ``my_azure_credential``
-``poc-nginx_controller-create_gw_app_component_vmss_north``     Create App on North GW / WAF                        ``playbooks/poc-nginx_controller.yaml``         ``create_gw_app_component_vmss_north``          `localhost``                                    ``localhost``
-``wf-nginx_managed-nap_update_waf_policy``                      Apply WAF policies                                  ``workflow`` see use case (C)
+``poc-azure_create-spoke-aks``                                  Create Ressource Group and vNet                     ``playbooks/poc-azure.yaml``                    ``create-spoke-aks``                                                                                                                            ``my_azure_credential``
+``poc-aks_create-registry``                                     Create ACR                                          ``playbooks/poc-aks.yaml``                      ``create-registry``                                                                                                                            ``my_azure_credential``
+``poc-aks_create-cluster``                                      Create AKS                                          ``playbooks/poc-aks.yaml``                      ``create-cluster``                                                                                                                            ``my_azure_credential``
+``poc-azure_create-vm-jumphost``                                Create Jumphost                                     ``playbooks/poc-azure.yaml``                    ``create-vm-jumphost``                                                                                                                            ``my_azure_credential``
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================   ================================================================================================================================================================================================================
 Extra variable                                  Description                                     Example
 ==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_project_name``                          Project name                                    ``CloudBuilderf5``
-``extra_vmss_name``                             NGINX VMSS name                                 ``myWAFcluster``
-``extra_platform_name``                         Consul DataCenter name                          ``Inbound``
-``extra_app_protect_monitor_ip``                Remote syslog server IP (Kibana, SIEM...)       ``10.0.0.20``
-``extra_app_protect_monitor_port``              Remote syslog server port (Kibana, SIEM...)     ``5144``
-``extra_nap_repo``                              WAF policy repo managed by SecOps               ``https://github.com/nergalex/f5-nap-policies.git``
-``extra_consul_path_source_of_truth``           Consul key path                                 ``poc_f5/inbound/nap``
-``extra_consul_path_lookup``                    Consul key | server names to protect            ``server_names``
-``extra_consul_agent_ip``                       Consul server IP                                ``10.100.0.60``
-``extra_consul_agent_port``                     Consul server port                              ``8500``
-``extra_consul_agent_scheme``                   Consul server scheme                            ``http``
-``extra_consul_datacenter``                     Consul datacenter                               ``Inbound``
-``extra_app``                                   App specification                               see below
-``extra_nginx_controller_ip``                                                                   ``10.0.0.38``
-``extra_nginx_controller_password``                                                             ``Cha4ngMe!``
-``extra_nginx_controller_username``                                                             ``admin@acme.com``
+``extra_platform_name``                         name used for resource group, vNet...           ``aksdistrict``
+``extra_location``                              Azure region                                    ``eastus2``
+``extra_platform_tags``                         Object tags                                     ``environment=DMO project=CloudBuilderf5``
+``extra_hub_name``                              used to create vNet peering with a HUB          ``HubInbound``
+``extra_vnet_address_prefixes``                 vNet CIDR                                       ``10.13.0.0/16``
+``extra_management_subnet_address_prefix``      Management subnet that hosts juphost            ``10.13.0.0/24``
+``extra_zone_subnet_address_prefix``            K8S Nodes and PODs subnet ; Azure CNI used      ``10.13.1.0/24``
+``extra_zone_name``                             K8S Nodes and PODs subnet ; Azure CNI used      ``cni-nodesandpods``
+``extra_service_cidr``                          K8S internal service subnet                     ``10.200.0.0/24``
+``extra_dns_service_ip``                        K8S internal DNS service subnet                 ``10.200.0.10``
+``extra_k8s_version``                           K8S version                                     ``1.19.0``
+``extra_admin_username``                        K8S admin user of jumphost                      ``PawnedAdmin``
+``extra_admin_ssh_crt``                         K8S public key of admin user                    ``ssh-rsa ...``
+``extra_app_vm_size``                           K8S VMSS / node VM size                         ``Standard_DS1_v2``
+``extra_sp_client_id``                          Service Principal / client ID                   ``<UUID>>``
+``extra_sp_client_secret``                      Service Principal / client Secret               ``...``
+``extra_jumphost``                              Dict / properties of jumphost                   ``...``
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
-``extra_app`` structure, also stored as is in Consul:
+``extra_jumphost`` structure:
 
 .. code:: yaml
 
-    extra_app:
-      components:
-        - name: north
-          type: adc
-          uri: /
-          workloads:
-            - 'http://10.12.1.4:81'
-      domain: f5app.dev
-      environment: PROD
-      name: webmap
-      tls:
-        crt: "-----BEGIN CERTIFICATE-----\r\n...\r\n...\r\n-----END CERTIFICATE-----"
-        key: "-----BEGIN RSA PRIVATE KEY-----\r\n...-----END RSA PRIVATE KEY-----"
+extra_jumphost:
+  name: jumphost
+  vm_size: Standard_DS1_v2
+  private_ip: 10.13.0.10
+  acl_src_ips:
+    - '10.0.0.0/8'
+  ssh_crt: -----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----
 
 
 B) [SecOps] Attach a specific WAF policy to an Application
