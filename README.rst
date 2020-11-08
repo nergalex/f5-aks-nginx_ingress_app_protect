@@ -76,8 +76,9 @@ WAF policy structure
 - **+-- Protection properties**
 - **+-- External references**: external file with also protection properties
 - **Core**: A core policy includes:
-- **+-- Modification**: Contains a list of changes to express exceptions to the intended policy. These exceptions are usually the result of fixing false positive incidents and failures in tests applied to those policies.
-These changes are more frequent than the Core policy.
+- **Modification**: Contains a list of changes to express exceptions to the intended policy. These exceptions are usually the result of fixing false positive incidents and failures in tests applied to those policies. These changes are more frequent than the Core policy.
+
+More details `here <https://docs.nginx.com/nginx-app-protect/configuration/#policy-authoring-and-tuning>`_.
 
 .. figure:: _figures/NIC_waf_policy_structure.png
 
