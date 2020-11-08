@@ -66,6 +66,21 @@ Administrative segmentation between DevOps and SecOps is done by associating k8s
 
 .. figure:: _figures/NIC_component_role.png
 
+WAF policy structure
+*********************
+- **Security level**: During Risk Analysis, Product Owner defines Security level needed for an App component, with SecOps or following a decision tree.
+- **WAF policy**: Each App have a WAF policy that includes:
+- **+-- Core**: protection required by Security level
+- **+-- Modification**: deviation from Security level
+- **Core**: A core policy includes:
+- **+-- Protection properties**
+- **+-- External references**: external file with also protection properties
+- **Core**: A core policy includes:
+- **+-- Modification**: Contains a list of changes to express exceptions to the intended policy. These exceptions are usually the result of fixing false positive incidents and failures in tests applied to those policies.
+These changes are more frequent than the Core policy.
+
+.. figure:: _figures/NIC_waf_policy_structure.png
+
 Demo
 ###############
 
@@ -80,71 +95,52 @@ Demo
 
 Pre-requisites
 ==============
-
-Kibana
-##############
-`install guide <https://github.com/464d41/f5-waf-elk-dashboards>`_
-
-NGINX Controller
-##############
-`install guide <https://github.com/MattDierick/docker-nginx-controller>`_
-
-Consul by Hashicorp
-###################
-`install guide <https://github.com/nergalex/f5-sslo-category#consul>`_
-
 Ansible Tower
 ##############
-
-Azure azure_preview_modules
+virtualenv
 ***************************
-This role is the most complete and includes all the latest Azure modules. The update and bug fix are done in a more timely manner than official Ansible release.
-If you use Ansible for Azure resource provisioning purpose, you're strongly encouraged to install this role.
-Follow `install guide <https://github.com/Azure/azure_preview_modules>`_
+- Create a virtualenv following `this guide <https://docs.ansible.com/ansible-tower/latest/html/upgrade-migration-guide/virtualenv.html>`_
+- In virtualenv, as a prerequisite for Azure collection, install Azure SDK following `this guide <https://github.com/ansible-collections/azure>`_
+- In virtualenv, as a prerequisite for K8S collection, install ``openshift`` following `this guide <https://github.com/ansible-collections/community.kubernetes>`_
+- In virtualenv, fix an issue during ``openshift`` installation ``google`` package dependency:
 
 .. code:: bash
 
-    $ sudo ansible-galaxy install azure.azure_preview_modules
-    $ sudo /var/lib/awx/venv/my_env/bin/pip install -U -r /etc/ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
-    $ sudo /var/lib/awx/venv/my_env/bin/pip show azure-mgmt-compute
+    $ vi /var/lib/awx/venv/myVirtualEnv/lib/python2.7/site-packages/google/__init__.py
+    $ <copy paste https://raw.githubusercontent.com/googleapis/google-auth-library-python/master/google/__init__.py>
 
-If ``azure-mgmt-compute`` < ``10.0.0`` then use last update from azure_preview_modules repo and not from Galaxy.
-``/etc/ansible/roles/`` is an example of an Tower installation where ``roles`` are located.
-
-.. code:: bash
-
-    $ sudo cd /etc/ansible/roles/
-    $ sudo git clone https://github.com/Azure/azure_preview_modules.git
-    $ sudo /var/lib/awx/venv/my_env/bin/pip install -r /etc/ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
-    $ sudo vi /etc/ansible/roles/azure.azure_preview_modules/defaults/main.yml
-        skip_azure_sdk: false
-
-Custom module for azure_preview_modules
-***************************************
-Copy modules below to ``/etc/ansible/roles/azure.azure_preview_modules/library/``:
-
-- ``azure_rm_networkinterface_vmss_info.py``
-- ``azure_rm_virtualmachinescalesetinstance_info.py``
-
-Consul
+Helm
 ***************************
+Install Helm following `this guide <https://helm.sh/docs/intro/install/>`_
 
 .. code:: bash
 
-    $ sudo /var/lib/awx/venv/my_env/bin/pip install python-consul
+    $ curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-VMSS credential
-***************
-Create custom credential `cred_NGINX` to manage access to VMs in VMSS
+Project
+***************************
+- Clone this repository to a private repo. A private repo is needed because a ``kubeconfig`` file will be store in ``playbooks/roles/poc-k8s/files``
+- Create a project following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/projects.html>`_
 
-=====================================================   =============================================       =============================================   =============================================   =============================================
-REDENTIAL TYPE                                            USERNAME                                           SSH PRIVATE KEY                                        SIGNED SSH CERTIFICATE                                        PRIVILEGE ESCALATION METHOD
-=====================================================   =============================================       =============================================   =============================================   =============================================
-``Machine``                                             ``my_VM_admin_user``                                ``my_VM_admin_user_key``                        ``my_VM_admin_user_CRT``                        ``sudo``
-=====================================================   =============================================       =============================================   =============================================   =============================================
+Credential
+***************************
+- Create a Service Principal on Azure following `this guide <https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app>`_
+- Create a Microsoft Azure Resource Manager following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/credentials.html#microsoft-azure-resource-manager>`_
+- Create Credentials for Jumphost tasks following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/credentials.html#machine>`_
 
-Role structure
-**************
+=====================================================   =============================================   =============================================   =============================================   =============================================
+REDENTIAL TYPE                                          USERNAME                                        SSH PRIVATE KEY                                 SIGNED SSH CERTIFICATE                          PRIVILEGE ESCALATION METHOD
+=====================================================   =============================================   =============================================   =============================================   =============================================
+``Machine``                                             ``my_VM_admin_user``                            ``my_VM_admin_user_key``                        ``my_VM_admin_user_CRT``                        ``sudo``
+=====================================================   =============================================   =============================================   =============================================   =============================================
+
+Webhook
+***************************
+- Clone `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_  to a new repo
+- Create a Webhook following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html>`_
+
+Ansible role structure
+######################
 - Deployment is based on ``workflow template``. Example: ``workflow template``=``wf-create_create_edge_security_inbound`` ;
 - A ``workflow template`` includes multiple ``job template``. Example: ``job template``=``poc-azure_create_hub_edge_security_inbound``
 - A ``job template`` have an associated ``playbook``. Example: ``playbook``=``playbooks/poc-azure.yaml``
@@ -167,6 +163,10 @@ Role structure
       when: activity is defined
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
+
+
+
+
 
 A) [DevOps] Deploy an Application
 ==================================================
