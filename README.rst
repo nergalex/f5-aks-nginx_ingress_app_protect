@@ -66,16 +66,11 @@ Administrative segmentation between DevOps and SecOps is done by associating k8s
 
 .. figure:: _figures/NIC_component_role.png
 
-
-
-
------------------------------------------------------------------------------
-TODO
------------------------------------------------------------------------------
-
-
 Demo
 ###############
+
+:kbd:`ToDo`
+
 - Automate an Application deployment
 .. raw:: html
 
