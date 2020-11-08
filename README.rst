@@ -209,9 +209,13 @@ Extra variable                                  Description                     
 
 .. code:: yaml
 
-extra_jumphost:
-  name: jumphost
-
+    extra_jumphost:
+      name: jumphost
+      vm_size: Standard_DS1_v2
+      private_ip: 10.13.0.10
+      acl_src_ips:
+        - '10.0.0.0/8'
+      ssh_crt: "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----"
 
 
 B) [SecOps] Attach a specific WAF policy to an Application
