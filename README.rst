@@ -206,6 +206,7 @@ Extra variable                                  Description                     
 
 ``extra_jumphost`` structure:
 
+
 .. code:: yaml
 
 extra_jumphost:
