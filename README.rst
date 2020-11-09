@@ -248,18 +248,22 @@ Download your NGINX+ licence files ``nginx-repo.crt`` and ``nginx-repo.key`` to 
 AKS - kubeconfig
 ***************************
 - Connect to Azure console
-- Download your kubeconfig file ``~/.kube/config`` to your private repository ``/playbooks/roles/poc-k8s/files/config.yaml``
-
-.. figure:: _figures/kube_config_file.png
-
-ACR - token
-***************************
-- Connect to Azure console
-- Get a repository ``accessToken`` to be authorized to push NGINX Controller image to ACR
 
 .. code:: bash
 
     $ az aks get-credentials --resource-group rg-<platform_name> --name CloudBuilder
+
+- Download your kubeconfig file ``~/.kube/config`` to your private repository ``/playbooks/roles/poc-k8s/files/config.yaml``
+
+ACR - token
+***************************
+- Connect to Azure console
+
+.. code:: bash
+
+    $ az acr login --name cloudbuilder.azurecr.io --expose-token
+
+- Get a repository ``accessToken`` to be authorized to push NGINX Controller image to ACR
 
 Workflow
 ###############################
@@ -284,6 +288,78 @@ Extra variable                                  Description                     
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 ``extra_jumphost`` structure:
+
+.. code:: yaml
+
+    extra_jumphost:
+      name: jumphost
+
+C) [DevOps] Publish an Application
+==================================================
+Pre-requisites
+###############################
+ACR - token
+***************************
+- Connect to Azure console
+
+.. code:: bash
+
+    $ az acr login --name cloudbuilder.azurecr.io --expose-token
+
+- Get a repository ``accessToken`` to be authorized to push NGINX Controller image to ACR
+
+Workflow
+###############################
+Create and launch a workflow template ``wf-k8s-publish-app`` that includes those Job templates in this order:
+
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+``poc-aks_get-registry_info``                                   Get login_server info                               ``playbooks/poc-aks.yaml``                      ``get-registry_info``                                                                                                                           ``my_azure_credential``
+``poc-azure_get-vm-jumphost``                                   Get FQDN jumphost info                              ``playbooks/poc-azure.yaml``                    ``get-vm-jumphost``                                                                                                                             ``my_azure_credential``
+``poc-k8s-create_app_image``                                    Build and push micro-services images                ``playbooks/poc-k8s_jumphost.yaml``             ``create_app_image``                            localhost                                                                                       ``cred_jumphost``
+``poc-k8s-deploy_app``                                          Deploy App, Services and Ingress                    ``playbooks/poc-k8s.yaml``                      ``deploy_app``                                  localhost
+``poc-k8s-deploy_gslb``                                         Deploy GSLB                                         ``playbooks/poc-k8s.yaml``                      ``deploy_gslb``                                 localhost
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+
+==============================================  =============================================   ================================================================================================================================================================================================================
+Extra variable                                  Description                                     Example
+==============================================  =============================================   ================================================================================================================================================================================================================
+``extra_platform_name``                         name used for resource group, vNet...           ``aksdistrict``
+``extra_elk``                                   Security log collector                          ``10.13.0.10``
+``extra_app``                                   App properties                                  see below
+``extra_cs``                                    F5 Cloud Services credentials                   see below
+``extra_jumphost``                              Dict / properties of jumphost                   see below
+==============================================  =============================================   ================================================================================================================================================================================================================
+
+.. code:: yaml
+
+    extra_app:
+      name: arcadia
+      domain: f5app.dev
+      gslb_location:
+        - eu
+      components:
+        - name: main
+          location: /
+          source_image: 'https://gitlab.com/arcadia-application/main-app.git'
+        - name: app2
+          location: /api
+          source_image: 'https://gitlab.com/arcadia-application/app2.git'
+        - name: app3
+          location: /app3
+          source_image: 'https://gitlab.com/arcadia-application/app3.git'
+        - name: backend
+          location: /files
+          source_image: 'https://gitlab.com/arcadia-application/back-end.git'
+
+.. code:: yaml
+
+    extra_cs:
+      username: name@acme.com
+      password: ...
+      hostname: api.cloudservices.f5.com
+      api_version: v1
 
 .. code:: yaml
 
