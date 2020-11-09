@@ -222,10 +222,8 @@ Extra variable                                  Description                     
 ``extra_app_vm_size``                           K8S VMSS / node VM size                         ``Standard_DS1_v2``
 ``extra_sp_client_id``                          Service Principal / client ID                   ``<UUID>>``
 ``extra_sp_client_secret``                      Service Principal / client Secret               ``...``
-``extra_jumphost``                              Dict / properties of jumphost                   see below
+``extra_jumphost``                              properties of jumphost                          dict, see below
 ==============================================  =============================================   ================================================================================================================================================================================================================
-
-``extra_jumphost`` structure:
 
 .. code:: yaml
 
@@ -284,10 +282,8 @@ Extra variable                                  Description                     
 ``extra_platform_name``                         name used for resource group, vNet...           ``aksdistrict``
 ``extra_nginx_ic_version``                      NGINX Ingress Controller version                ``1.9.0``
 ``extra_ilb_ingress_ip``                        Azure ILB VIP for Internal Ingress              ``eastus2``
-``extra_jumphost``                              Dict / properties of jumphost                   see below
+``extra_jumphost``                              properties of jumphost                          dict, see below
 ==============================================  =============================================   ================================================================================================================================================================================================================
-
-``extra_jumphost`` structure:
 
 .. code:: yaml
 
@@ -327,9 +323,9 @@ Extra variable                                  Description                     
 ==============================================  =============================================   ================================================================================================================================================================================================================
 ``extra_platform_name``                         name used for resource group, vNet...           ``aksdistrict``
 ``extra_elk``                                   Security log collector                          ``10.13.0.10``
-``extra_app``                                   App properties                                  see below
-``extra_cs``                                    F5 Cloud Services credentials                   see below
-``extra_jumphost``                              Dict / properties of jumphost                   see below
+``extra_app``                                   App properties                                  dict, see below
+``extra_cs``                                    F5 Cloud Services credentials                   dict, see below
+``extra_jumphost``                              properties of jumphost                          dict, see below
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
