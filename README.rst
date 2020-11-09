@@ -165,11 +165,6 @@ REDENTIAL TYPE                                          USERNAME                
 ``Machine``                                             ``my_VM_admin_user``                            ``my_VM_admin_user_key``                        ``my_VM_admin_user_CRT``                        ``sudo``
 =====================================================   =============================================   =============================================   =============================================   =============================================
 
-Webhook
-***************************
-- Clone `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_  to a new repo
-- Create a Webhook following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html>`_
-
 Ansible role structure
 ######################
 - Deployment is based on ``workflow template``. Example: ``workflow template`` = ``wf-create_create_edge_security_inbound``
@@ -195,7 +190,7 @@ Ansible role structure
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
 
-0) [DevOps] Deploy Infrastructure
+0) [DevOps] Deploy AKS infrastructure
 ==================================================
 Create and launch a workflow template ``wf-aks-create-infra`` that includes those Job templates in this order:
 
@@ -240,7 +235,7 @@ Extra variable                                  Description                     
         - '10.0.0.0/8'
       ssh_crt: "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----"
 
-B) [SecOps] Deploy Ingress Controller
+A) [SecOps] Deploy Ingress Controller
 ==================================================
 Pre-requisites
 ###############################
@@ -298,6 +293,30 @@ Extra variable                                  Description                     
     extra_jumphost:
       name: jumphost
 
+B) [SecOps] Deploy App certificate
+==================================================
+Create and launch a workflow template ``wf-k8s-deploy-secret_ssl`` that includes those Job templates in this order:
+
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+``poc-k8s-deploy_ssl``                                          Create a SSL key pair                               ``playbooks/poc-k8s.yaml``                      ``deploy_ssl``                                  localhost
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+
+==============================================  =============================================   ================================================================================================================================================================================================================
+Extra variable                                  Description                                     Example
+==============================================  =============================================   ================================================================================================================================================================================================================
+``extra_app``                                   App properties                                  dict, see below
+``extra_app_name``                              App hostname                                    survey, text type
+``extra_app_tls_crt``                           App SSL certificate                             survey, textarea type
+``extra_app_tls_key``                           App SSL private key                             survey, textarea type
+==============================================  =============================================   ================================================================================================================================================================================================================
+
+.. code:: yaml
+
+    extra_app:
+      domain: f5app.dev
+
 C) [DevOps] Publish an Application
 ==================================================
 Pre-requisites
@@ -334,6 +353,9 @@ Extra variable                                  Description                     
 ``extra_app``                                   App properties                                  dict, see below
 ``extra_cs``                                    F5 Cloud Services credentials                   dict, see below
 ``extra_jumphost``                              properties of jumphost                          dict, see below
+``extra_acr_token``                             ACR token                                       survey, text type
+``extra_app_swagger_url``                       swagger file repo URI                           survey, text type; 'none' == no API Security
+``extra_waf_policy_level``                      Security level                                  survey, multiple choice type: low, medium, high
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
@@ -369,3 +391,38 @@ Extra variable                                  Description                     
 
     extra_jumphost:
       name: jumphost
+
+D) [SecOps] Update WAF policy attached to a security level
+==================================================
+Raise webhook after a ``pull request`` is done on WAF policies repository
+
+Workflow
+###############################
+Create and launch a workflow template ``wf-k8s-fetch-waf-policies`` that includes those Job templates in this order:
+
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+``poc-k8s-reload_ingress``                                      Reload NGINX Ingress Controller                     ``playbooks/poc-k8s.yaml``                      ``deploy_app``                                  localhost
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+
+Webhook
+***************************
+- Clone `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_  to a new repo
+- Create a Webhook following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html>`_
+
+E) [SecOps] Fix false positive
+==================================================
+Raise webhook after a ``pull request`` is done on WAF policies repository
+Execute step (D).
+
+F) [DevOps] Secure published API
+==================================================
+Execute step (C) setting ``extra_app_swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
+
+E) [SecOps] Fix false positive
+==================================================
+Execute step (A).
+
+
+
