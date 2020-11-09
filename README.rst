@@ -10,8 +10,8 @@ Use Case
 - **Organization** -- Delegate App publication to DevOps and WAF policies to SecOps
 - **Automation** -- Automate use cases:
 
-A) [DevOps] **Deploy Infrastructure** -- DevOps deploy K8S Ingress with an embedded WAF
-B) [SecOps] **Deploy Security objects** -- SecOps deploy security objects (NGINX Ingress Controller, Secret/SSL key pair, WAF policies)
+A) [SecOps] **Deploy Ingress Controller** -- SecOps deploy K8S Ingress with an embedded WAF
+B) [SecOps] **Deploy App certificate** -- SecOps deploy per App security objects (Secret/SSL key pair)
 C) [DevOps] **Publish an Application** -- DevOps deploy Applications by selecting a pre-defined security level
 D) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
 E) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
@@ -84,7 +84,12 @@ More details `here <https://docs.nginx.com/nginx-app-protect/configuration/#poli
 
 Demo
 ###############
-B) [SecOps] Deploy Security objects
+A) [SecOps] Deploy Ingress Controller
+*********************
+
+:kbd:`ToDo`
+
+B) [SecOps] Deploy App certificate
 *********************
 
 :kbd:`ToDo`
@@ -190,7 +195,7 @@ Ansible role structure
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
 
-A) [DevOps] Deploy Infrastructure
+0) [DevOps] Deploy Infrastructure
 ==================================================
 Create and launch a workflow template ``wf-aks-create-infra`` that includes those Job templates in this order:
 
@@ -235,7 +240,7 @@ Extra variable                                  Description                     
         - '10.0.0.0/8'
       ssh_crt: "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----"
 
-B) [SecOps] Deploy Security objects
+B) [SecOps] Deploy Ingress Controller
 ==================================================
 Pre-requisites
 ###############################
@@ -283,6 +288,9 @@ Extra variable                                  Description                     
 ``extra_nginx_ic_version``                      NGINX Ingress Controller version                ``1.9.0``
 ``extra_ilb_ingress_ip``                        Azure ILB VIP for Internal Ingress              ``eastus2``
 ``extra_jumphost``                              properties of jumphost                          dict, see below
+``extra_acr_token``                             ACR token                                       survey entry, text type
+``extra_wildcard_tls_crt``                      Default wildcard certificate                    survey entry, textarea type
+``extra_wildcard_tls_key``                      Default wildcard private key                    survey entry, textarea type
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
