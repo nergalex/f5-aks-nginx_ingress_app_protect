@@ -74,8 +74,7 @@ WAF policy structure
 - **+-- Modification**: deviation from Security level
 - **Core**: A core policy includes:
 - **+-- Protection properties**
-- **+-- External references**: external file with also protection properties
-- **Core**: A core policy includes:
+- **+-- External references**: external file that specifies protection properties
 - **Modification**: Contains a list of changes to express exceptions to the intended policy. These exceptions are usually the result of fixing false positive incidents and failures in tests applied to those policies. These changes are more frequent than the Core policy.
 
 .. figure:: _figures/NIC_waf_policy_structure.png
