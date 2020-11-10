@@ -468,3 +468,4 @@ Reference
 - `NGINX Ingress Controller - snippet <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-snippets/>`_
 - `NGINX Ingress Controller - App Protect annotation <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/#app-protect>`_
 - `NGINX Ingress Controller - Minions <https://github.com/nginxinc/kubernetes-ingress/tree/master/examples/mergeable-ingress-types>`_
+- `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_
