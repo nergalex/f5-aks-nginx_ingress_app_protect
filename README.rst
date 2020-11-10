@@ -10,13 +10,12 @@ Use Case
 - **Organization** -- Delegate App publication to DevOps and WAF policies to SecOps
 - **Automation** -- Automate use cases:
 
-A) [SecOps] **Deploy Ingress Controller** -- SecOps deploy K8S Ingress with an embedded WAF
-B) [SecOps] **Deploy App certificate** -- SecOps deploy per App security objects (Secret/SSL key pair)
-C) [DevOps] **Publish an Application** -- DevOps deploy Applications by selecting a pre-defined security level
-D) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
-E) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
-F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
-G) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
+A) [SecOps] **Deploy Ingress Controller** -- SecOps deploy K8S Ingress with an embedded WAF and wildcard certificate
+B) [DevOps] **Publish an Application** -- DevOps deploy Applications by selecting a pre-defined security level
+C) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
+D) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
+E) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
+F) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
 
 Benefit
 ###############
@@ -89,32 +88,27 @@ A) [SecOps] Deploy Ingress Controller
 
 :kbd:`ToDo`
 
-B) [SecOps] Deploy App certificate
+B) [DevOps] Publish an Application
 *********************
 
 :kbd:`ToDo`
 
-C) [DevOps] Publish an Application
+C) [SecOps] Update WAF policy attached to a security level
 *********************
 
 :kbd:`ToDo`
 
-D) [SecOps] Update WAF policy attached to a security level
+D) [SecOps] Fix false positive
 *********************
 
 :kbd:`ToDo`
 
-E) [SecOps] Fix false positive
+E) [DevOps] Secure published API
 *********************
 
 :kbd:`ToDo`
 
-F) [DevOps] Secure published API
-*********************
-
-:kbd:`ToDo`
-
-G) [SecOps] Update signatures
+F) [SecOps] Update signatures
 *********************
 
 :kbd:`ToDo`
@@ -293,31 +287,7 @@ Extra variable                                  Description                     
     extra_jumphost:
       name: jumphost
 
-B) [SecOps] Deploy App certificate
-==================================================
-Create and launch a workflow template ``wf-k8s-deploy-secret_ssl`` that includes those Job templates in this order:
-
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-``poc-k8s-deploy_ssl``                                          Create a SSL key pair                               ``playbooks/poc-k8s.yaml``                      ``deploy_ssl``                                  localhost
-=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
-
-==============================================  =============================================   ================================================================================================================================================================================================================
-Extra variable                                  Description                                     Example
-==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_app``                                   App properties                                  dict, see below
-``extra_app_name``                              App hostname                                    survey, text type
-``extra_app_tls_crt``                           App SSL certificate                             survey, textarea type
-``extra_app_tls_key``                           App SSL private key                             survey, textarea type
-==============================================  =============================================   ================================================================================================================================================================================================================
-
-.. code:: yaml
-
-    extra_app:
-      domain: f5app.dev
-
-C) [DevOps] Publish an Application
+B) [DevOps] Publish an Application
 ==================================================
 Pre-requisites
 ###############################
@@ -356,6 +326,8 @@ Extra variable                                  Description                     
 ``extra_acr_token``                             ACR token                                       survey, text type
 ``extra_app_swagger_url``                       swagger file repo URI                           survey, text type; 'none' == no API Security
 ``extra_waf_policy_level``                      Security level                                  survey, multiple choice type: low, medium, high
+``extra_app_tls_crt``                           App SSL certificate                             survey, textarea type
+``extra_app_tls_key``                           App SSL private key                             survey, textarea type
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
@@ -393,9 +365,9 @@ Extra variable                                  Description                     
     extra_jumphost:
       name: jumphost
 
-D) [SecOps] Update WAF policy attached to a security level
+C) [SecOps] Update WAF policy attached to a security level
 ==================================================
-Raise webhook after a ``pull request`` is done on WAF policies repository
+Raise webhook after a ``pull request`` is done on WAF policies repository and launch automatically step (B).
 
 Workflow
 ###############################
@@ -412,16 +384,15 @@ Webhook
 - Clone `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_  to a new repo
 - Create a Webhook following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html>`_
 
-E) [SecOps] Fix false positive
+D) [SecOps] Fix false positive
 ==================================================
-Raise webhook after a ``pull request`` is done on WAF policies repository
-Execute step (D).
+Raise webhook after a ``pull request`` is done on WAF policies repository and launch automatically step (C).
 
-F) [DevOps] Secure published API
+E) [DevOps] Secure published API
 ==================================================
-Execute step (C) setting ``extra_app.components.2.swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
+Execute step (B) setting ``extra_app.components.2.swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
 
-E) [SecOps] Fix false positive
+F) [SecOps] Fix false positive
 ==================================================
 Execute step (A).
 
