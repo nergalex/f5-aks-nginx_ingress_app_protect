@@ -428,6 +428,7 @@ Execute step (A).
 Troubleshoot
 ==================================================
 Get External Ingress Controller PODs:
+
 :kbd:`kubectl describe pod --namespace external-ingress-controller`
 
 
