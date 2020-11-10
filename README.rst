@@ -372,6 +372,7 @@ Extra variable                                  Description                     
         - name: app2
           location: /api
           source_image: 'https://gitlab.com/arcadia-application/app2.git'
+          swagger_url: none
         - name: app3
           location: /app3
           source_image: 'https://gitlab.com/arcadia-application/app3.git'
@@ -418,11 +419,40 @@ Execute step (D).
 
 F) [DevOps] Secure published API
 ==================================================
-Execute step (C) setting ``extra_app_swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
+Execute step (C) setting ``extra_app.components.2.swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
 
 E) [SecOps] Fix false positive
 ==================================================
 Execute step (A).
 
+Troubleshoot
+==================================================
+Get External Ingress Controller PODs
+``kubectl describe pod --namespace external-ingress-controller``
 
+View Ingress Controller status (Cache, Zones, Upstream servers) from Jumphost
+``http://<Pod_IP>:8080/dashboard.html``
 
+Get error logs from an External Ingress Controller POD
+``kubectl logs --namespace external-ingress-controller <POD_name>``
+
+Launch a shell on an External Ingress Controller POD
+``kubectl exec --namespace external-ingress-controller -it <POD_name> sh``
+
+View WAF policies for App 'arcadia'
+``kubectl describe --namespace external-ingress-controller --selector 'app==arcadia' APPolicy``
+
+View App's Service
+``kubectl get svc --namespace arcadia -owide``
+
+View App's Ingress
+``kubectl get ingress --namespace arcadia -owide``
+
+Reference
+==================================================
+- `F5 attack signature info <https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Essential.App.Protect-Details.html#attack-signatures>`_
+- `AWS NGINX eXperience <http://aws.nginx-experience.com>`_
+- `NGINX Ingress Controller - HELM <https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/#configuration>`_
+- `NGINX Ingress Controller - snippet <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-snippets/>`_
+- `NGINX Ingress Controller - App Protect annotation <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/#app-protect>`_
+- `NGINX Ingress Controller - Minions <https://github.com/nginxinc/kubernetes-ingress/tree/master/examples/mergeable-ingress-types>`_
