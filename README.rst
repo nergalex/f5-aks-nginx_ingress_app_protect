@@ -101,22 +101,22 @@ C) [DevOps] Update App's Security level
 
 :kbd:`ToDo`
 
-C) [SecOps] Update WAF policy attached to a security level
+D) [SecOps] Update WAF policy attached to a security level
 *********************
 
 :kbd:`ToDo`
 
-D) [SecOps] Fix false positive
+E) [SecOps] Fix false positive
 *********************
 
 :kbd:`ToDo`
 
-E) [DevOps] Secure published API
+F) [DevOps] Secure published API
 *********************
 
 :kbd:`ToDo`
 
-F) [SecOps] Update signatures
+G) [SecOps] Update signatures
 *********************
 
 :kbd:`ToDo`
