@@ -16,7 +16,7 @@ C) [SecOps] **Update App's Security level** -- Regarding risk analysis and new A
 D) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
 E) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
 F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
-G) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
+G) [SecOps] **Update WAF signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
 
 Benefit
 ###############
@@ -390,8 +390,6 @@ Extra variable                                  Description                     
 ``extra_app``                                   App properties                                  dict, see below
 ``extra_app_swagger_url``                       swagger file repo URI                           survey, text type; 'none' == no API Security
 ``extra_waf_policy_level``                      Security level                                  survey, multiple choice type: low, medium, high
-``extra_app_tls_crt``                           App SSL certificate                             survey, textarea type
-``extra_app_tls_key``                           App SSL private key                             survey, textarea type
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
@@ -425,9 +423,9 @@ Raise webhook after a ``pull request`` is done on WAF policies repository and la
 
 F) [DevOps] Secure published API
 ==================================================
-Execute step (B) setting ``extra_app.components.2.swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
+Execute step (C) setting ``extra_app_swagger_url`` value with ``https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/arcadia.f5app.dev.yaml``
 
-G) [SecOps] Fix false positive
+G) [SecOps] Update WAF signatures
 ==================================================
 Execute step (A).
 
