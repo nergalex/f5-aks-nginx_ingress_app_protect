@@ -15,7 +15,7 @@ B) [DevOps] **Publish an Application** -- DevOps deploy Applications on Ingress 
 C) [DevOps] **Update App's Security level** -- Regarding risk analysis and new App's features, Product Owner requests an update of App's Security level
 D) [SecOps] **Update WAF policy attached to a security level** -- Threats evolve, SecOps adapt WAF strategy to protect capital assets: applications
 E) [SecOps] **Fix false positive** -- SecOps modify an application's WAF policy to fix False Positives that impact User Experience
-F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
+F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update App's OpenAPI specifications.
 G) [SecOps] **Update WAF signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
 
 Benefit
