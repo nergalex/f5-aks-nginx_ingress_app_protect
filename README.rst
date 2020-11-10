@@ -419,7 +419,7 @@ Webhook
 
 E) [SecOps] Fix false positive
 ==================================================
-Raise webhook after a ``pull request`` is done on WAF policies repository and launch automatically step (C).
+Raise webhook after a ``pull request`` is done on WAF policies repository, that's launched automatically step (D).
 
 F) [DevOps] Secure published API
 ==================================================
@@ -427,7 +427,7 @@ Execute step (C) setting ``extra_app_swagger_url`` value with ``https://raw.gith
 
 G) [SecOps] Update WAF signatures
 ==================================================
-Execute step (A).
+Execute step (A) when a notification/alert is received from `F5 mailing list <https://interact.f5.com/F5-Preference-Center.html>`_
 
 Troubleshoot
 ==================================================
