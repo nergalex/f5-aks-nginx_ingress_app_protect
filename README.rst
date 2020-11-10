@@ -12,10 +12,11 @@ Use Case
 
 A) [SecOps] **Deploy Ingress Controller** -- SecOps deploy K8S Ingress with an embedded WAF and wildcard certificate
 B) [DevOps] **Publish an Application** -- DevOps deploy Applications by selecting a pre-defined security level
-C) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
-D) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
-E) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
-F) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
+C) [SecOps] **Update App's Security level** -- Regarding risk analysis and new App's features, Product Owner requests an update of App's Security level
+D) [SecOps] **Update WAF policy attached to a security level** -- The threat evolves, SecOps adapts WAF strategy to protect capital asset: application
+E) [SecOps] **Fix false positive** -- SecOps modify a application's WAF policy to fix a False Positive that impact User Experience
+F) [DevOps] **Secure published API** -- Limit the attack surface by allow access to only compliant API call. DevOps regularly update OpenAPI specifications of an App.
+G) [SecOps] **Update signatures** -- SecOps do rolling upgrade of NGINX Ingress Controller images with up to date protection engine and signatures.
 
 Benefit
 ###############
@@ -87,8 +88,15 @@ A) [SecOps] Deploy Ingress Controller
 *********************
 
 :kbd:`ToDo`
+https://youtu.be/2QuP4FQ1-EU
 
 B) [DevOps] Publish an Application
+*********************
+
+:kbd:`ToDo`
+https://youtu.be/EN6OWU97ogM
+
+C) [DevOps] Update App's Security level
 *********************
 
 :kbd:`ToDo`
@@ -365,7 +373,34 @@ Extra variable                                  Description                     
     extra_jumphost:
       name: jumphost
 
-C) [SecOps] Update WAF policy attached to a security level
+C) [DevOps] Update App's Security level
+==================================================
+Create and launch a workflow template ``wf-k8s-update_app_security`` that includes those Job templates in this order:
+
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+Job template                                                    objective                                           playbook                                        activity                                        inventory                                       limit                                           credential
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+``Confirm Security level?``                                     Request approval from SecOps                        ``playbooks/poc-k8s.yaml``                      ``deploy_app``                                  localhost
+``poc-k8s-update_security``                                     Update SSL Certificate and WAF policy level         ``playbooks/poc-k8s.yaml``                      ``update_security``                                  localhost
+=============================================================   =============================================       =============================================   =============================================   =============================================   =============================================   =============================================
+
+==============================================  =============================================   ================================================================================================================================================================================================================
+Extra variable                                  Description                                     Example
+==============================================  =============================================   ================================================================================================================================================================================================================
+``extra_app``                                   App properties                                  dict, see below
+``extra_app_swagger_url``                       swagger file repo URI                           survey, text type; 'none' == no API Security
+``extra_waf_policy_level``                      Security level                                  survey, multiple choice type: low, medium, high
+``extra_app_tls_crt``                           App SSL certificate                             survey, textarea type
+``extra_app_tls_key``                           App SSL private key                             survey, textarea type
+==============================================  =============================================   ================================================================================================================================================================================================================
+
+.. code:: yaml
+
+    extra_app:
+      name: arcadia
+      domain: f5app.dev
+
+D) [SecOps] Update WAF policy attached to a security level
 ==================================================
 Raise webhook after a ``pull request`` is done on WAF policies repository and launch automatically step (B).
 
@@ -384,15 +419,15 @@ Webhook
 - Clone `WAF policies repository <https://github.com/nergalex/f5-nap-policies>`_  to a new repo
 - Create a Webhook following `this guide <https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html>`_
 
-D) [SecOps] Fix false positive
+E) [SecOps] Fix false positive
 ==================================================
 Raise webhook after a ``pull request`` is done on WAF policies repository and launch automatically step (C).
 
-E) [DevOps] Secure published API
+F) [DevOps] Secure published API
 ==================================================
 Execute step (B) setting ``extra_app.components.2.swagger_url`` value with ``https://github.com/nergalex/f5-nap-policies/blob/master/policy/open-api-files/arcadia.f5app.dev.yaml``
 
-F) [SecOps] Fix false positive
+G) [SecOps] Fix false positive
 ==================================================
 Execute step (A).
 
