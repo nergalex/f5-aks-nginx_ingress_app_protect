@@ -37,7 +37,7 @@ In this demo, functional components in the data path between Application code an
 - **+-- Virtual Patching**: block exploitation of vulnerabilities (`CVE <https://cve.mitre.org/>`_) on underlying App's technologies / framework (Apache, Django, Postgre SQL...)
 - **+-- Weakness in code**: Following awareness of OWASP foundation for `Web app <https://owasp.org/www-project-top-ten/>`_ and `API app <https://owasp.org/www-project-api-security/>`_, raise protection to `prevent from hacking actions <http://veriscommunity.net/enums.html#section-actions>`_
 - **+-- Threat Campaign**: Because patient zero are honey pots, obtain associated attack signatures against 0-day from `Application Threat Intelligence <https://www.f5.com/labs/application-protection>`_
-- **K8S Ingress / Content routing** -- Route and load balance traffic to PODs hosted on Kubernetes
+- **K8S Ingress / Content routing** -- Cache HTTP objects, micro-cache, route based on URI, monitor service, load balance traffic to PODs and send metrics/security events to remote log collectors
 
 .. figure:: _figures/NIC_functionnal_view.png
 
