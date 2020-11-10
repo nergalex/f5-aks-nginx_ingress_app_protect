@@ -1,0 +1,24 @@
+---
+- name: SET WAF policy - variables
+  set_fact:
+    url_waf_policy_core: "https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/core/secure_{{ extra_waf_policy_level }}.yaml"
+    url_waf_policy_modifications: "https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/modifications/{{extra_app.name}}.{{extra_app.domain}}.json"
+    var_waf_version: "{{ 1000 | random | to_uuid }}"
+
+- name: WAF policy version ID
+  debug:
+    var: var_waf_version
+
+- name: CREATE external WAF policy
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', 'policy-external-generic.yaml') | from_yaml }}"
+    kubeconfig: "config.yaml"
+
+- name: CREATE Ingress external - master
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', 'ingress-external_master.yaml') | from_yaml }}"
+    kubeconfig: "config.yaml"
+    force: yes
+    apply: yes
+
+...

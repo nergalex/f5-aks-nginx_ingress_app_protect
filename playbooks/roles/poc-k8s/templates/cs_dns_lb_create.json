@@ -1,0 +1,63 @@
+{
+    "account_id": "{{ cs_account.json.primary_account_id }}",
+    "catalog_id": "c-aaQnOrPjGu",
+    "service_type": "gslb",
+    "service_instance_name": "{{ extra_app.domain }}",
+    "configuration": {
+        "gslb_service": {
+            "zone": "{{ extra_app.domain }}",
+            "load_balanced_records": {{ var_new_lbr }},
+            "monitors": {{ var_new_monitor }},
+            "pools": {{ var_new_pool }},
+            "virtual_servers": {{ var_new_virtual_server }},
+            "regions": {
+                "regions_EU": {
+                    "display_name": "Europe",
+                    "sectors": [
+                                {
+                                    "code": "EU",
+                                    "scale": "continent"
+                                }
+                            ]
+                },
+                "regions_Everywhere": {
+                    "display_name": "Everywhere",
+                    "sectors": [
+                       {
+                            "code": "EU",
+                            "scale": "continent"
+                       },
+                        {
+                            "code": "NA",
+                            "scale": "continent"
+                        },
+                        {
+                            "code": "AN",
+                            "scale": "continent"
+                        },
+                        {
+                            "code": "AS",
+                            "scale": "continent"
+                        },
+                        {
+                            "code": "OC",
+                            "scale": "continent"
+                        },
+                        {
+                            "code": "SA",
+                            "scale": "continent"
+                        },
+                        {
+                            "code": "AF",
+                            "scale": "continent"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+
+
+

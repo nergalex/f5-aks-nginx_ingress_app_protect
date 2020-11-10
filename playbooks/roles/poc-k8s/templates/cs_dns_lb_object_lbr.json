@@ -1,0 +1,26 @@
+{
+    "app_{{ extra_app.name}}": {
+        "display_name": "CMP_{{ extra_app.name}}",
+        "aliases": [
+            "{{ extra_app.name}}"
+        ],
+        "enable": true,
+        "persist_cidr_ipv4": 24,
+        "persist_cidr_ipv6": 56,
+        "persistence": true,
+        "persistence_ttl": 3600,
+        "proximity_rules": [
+            {
+                "pool": "pools_Global_Pool_{{ extra_app.name}}",
+                "region": "regions_Everywhere",
+                "score": 50
+            },
+            {
+                "pool": "pools_EU_Pool_{{ extra_app.name}}",
+                "region": "regions_EU",
+                "score": 80
+            }
+        ],
+        "rr_type": "A"
+    }
+}

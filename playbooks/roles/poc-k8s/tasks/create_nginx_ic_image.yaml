@@ -1,0 +1,82 @@
+---
+- name: CREATE cert directory
+  file:
+    path: /etc/ssl/nginx/
+    state: directory
+
+- name: COPY NGINX certificate
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.crt"
+    mode: '0400'
+
+- name: COPY NGINX key
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.key"
+    mode: '0400'
+
+- name: CREATE yum repo directory
+  file:
+    path: /etc/yum.repos.d
+    state: directory
+
+- name: FETCH NGINX+ yum repo directory
+  get_url:
+    url: "https://cs.nginx.com/static/files/nginx-plus-7.repo"
+    dest: /etc/yum.repos.d
+    mode: '0700'
+
+- name: FETCH NGINX+ yum repo directory
+  get_url:
+    url: "https://cs.nginx.com/static/files/app-protect-signatures-7.repo"
+    dest: /etc/yum.repos.d
+    mode: '0700'
+
+- name: GET signature version
+  shell: "yum info app-protect-attack-signatures | grep Version | cut -d':' -f2 | cut -d' ' -f2"
+  register: var_signature_version
+
+- name: SHOW signature version
+  debug:
+    var: var_signature_version.stdout
+
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git NAP configuration
+  git:
+    repo: https://github.com/nginxinc/kubernetes-ingress/
+    dest: /root/source_images/kubernetes-ingress
+    force: yes
+
+- name: FETCH version
+  command:
+    cmd: "git checkout v{{ extra_nginx_ic_version }}"
+    chdir: /root/source_images/kubernetes-ingress/deployments
+
+- name: COPY NGINX certificate
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: /root/source_images/kubernetes-ingress/nginx-repo.crt
+    mode: '0400'
+
+- name: COPY NGINX key
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: /root/source_images/kubernetes-ingress/nginx-repo.key
+    mode: '0400'
+
+- name: BUILD and PUSH image
+  shell: "docker login {{ stats_acr_login_server }} -u 00000000-0000-0000-0000-000000000000 -p {{ extra_acr_token }} && make DOCKERFILE=appprotect/DockerfileWithAppProtectForPlus PREFIX={{ stats_acr_login_server }}/nap-ingress TAG={{ extra_nginx_ic_version }}-{{var_signature_version.stdout}}"
+  args:
+    chdir: /root/source_images/kubernetes-ingress/
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_nginx_ic_image_tag:  "{{ extra_nginx_ic_version }}-{{var_signature_version.stdout}}"
+
+...

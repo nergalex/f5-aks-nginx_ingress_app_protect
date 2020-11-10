@@ -1,0 +1,31 @@
+---
+- name: Pause during github Cache refresh
+  pause:
+    seconds: 30
+
+- name: GET Ingress
+  community.kubernetes.k8s_info:
+    kind: Ingress
+    kubeconfig: "config.yaml"
+  register: var_resources
+
+- name: SET var_subscription_id
+  set_fact:
+    var_found: 0
+
+- name: SET var_subscription_id
+  set_fact:
+    var_resource: "{{ item }}"
+    var_found: 1
+  loop: "{{ var_resources.resources }}"
+  when: item.metadata.annotations['kubernetes.io/ingress.class'] == "nginx-external" and var_found == 0
+
+- name: CREATE Ingress external
+  community.kubernetes.k8s:
+    definition: "{{ var_resource }}"
+    kubeconfig: "config.yaml"
+    force: yes
+    apply: yes
+  when: var_resource is defined
+
+...

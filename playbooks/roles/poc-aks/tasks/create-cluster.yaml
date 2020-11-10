@@ -1,0 +1,45 @@
+---
+- name: GET subnet hosting NODEs and PODs in a cluster using Azure CNI
+  delegate_to: localhost
+  azure.azcollection.azure_rm_subnet_info:
+    resource_group: "rg-{{ extra_platform_name }}"
+    virtual_network_name: "vnet-{{ extra_platform_name }}"
+    name: "net-{{ extra_platform_name }}-{{ extra_zone_name }}"
+  register: subnet_info
+
+- name: CREATE an Azure Kubernetes Service
+  delegate_to: localhost
+  azure.azcollection.azure_rm_aks:
+    resource_group: "rg-{{ extra_platform_name }}"
+    name: CloudBuilder
+    location: "{{ extra_location }}"
+    dns_prefix: "{{ extra_platform_name }}"
+    kubernetes_version: "{{ extra_k8s_version }}"
+    linux_profile:
+      admin_username: "{{ extra_admin_username }}"
+      ssh_key: "{{ extra_admin_ssh_crt }}"
+    agent_pool_profiles:
+      - name: "{{ extra_platform_name }}"
+        count: 2
+        vm_size: "{{ extra_app_vm_size }}"
+        os_disk_size_gb: 96
+        enable_auto_scaling: True
+        max_count: 2
+        min_count: 2
+        type: VirtualMachineScaleSets
+        vnet_subnet_id: "{{ subnet_info.subnets.0.id }}"
+    service_principal:
+      client_id: "{{ extra_sp_client_id }}"
+      client_secret: "{{ extra_sp_client_secret }}"
+    enable_rbac: yes
+    network_profile:
+      network_plugin: azure
+      network_policy: azure
+      service_cidr: "{{ extra_service_cidr }}"
+      dns_service_ip: "{{ extra_dns_service_ip }}"
+      docker_bridge_cidr: "172.17.0.1/16"
+      load_balancer_sku: Standard
+
+
+
+...

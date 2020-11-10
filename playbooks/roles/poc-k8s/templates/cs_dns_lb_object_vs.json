@@ -1,0 +1,16 @@
+{
+    {%- if 'eu' in extra_app.gslb_location -%}
+    "ipEndpoints_EU_app_instance_{{ extra_app.name}}": {
+        "address": "{{ var_lb_ip }}",
+        "display_name": "app instance {{ extra_app.name}} for Europe",
+        "monitor": "monitor_{{ extra_app.name}}",
+        "port": 443
+    },
+    {%- endif -%}
+    "ipEndpoints_Global_app_instance_{{ extra_app.name}}": {
+        "address": "{{ var_lb_ip }}",
+        "display_name": "app instance {{ extra_app.name}} by default",
+        "monitor": "monitor_{{ extra_app.name}}",
+        "port": 443
+    }
+}

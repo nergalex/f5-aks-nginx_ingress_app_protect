@@ -1,0 +1,18 @@
+---
+- name: GET azure container registry info
+  delegate_to: localhost
+  azure.azcollection.azure_rm_containerregistry_info:
+    name: CloudBuilder
+    resource_group: "rg-{{ extra_platform_name }}"
+  register: output
+
+- name: fqdn
+  debug:
+    msg: "fqdn: {{ output.registries.0.login_server }}"
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_acr_login_server:  "{{ output.registries.0.login_server }}"
+
+...

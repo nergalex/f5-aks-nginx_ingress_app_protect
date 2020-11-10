@@ -1,0 +1,10 @@
+---
+collections:
+- name: azure.azcollection
+- name: community.kubernetes
+  version: 1.1.1
+
+# With the collection name, version, and source options
+# - name: my_namespace.my_other_collection
+#   version: 'version range identifiers (default: ``*``)'
+#   source: 'The Galaxy URL to pull the collection from (default: ``--api-server`` from cmdline)'

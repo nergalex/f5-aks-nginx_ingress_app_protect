@@ -87,44 +87,45 @@ Demo
 A) [SecOps] Deploy Ingress Controller
 *********************
 
-:kbd:`ToDo`
-https://youtu.be/2QuP4FQ1-EU
+.. raw:: html
+
+    <a href="http://www.youtube.com/watch?v=2QuP4FQ1-EU"><img src="http://img.youtube.com/vi/2QuP4FQ1-EU/0.jpg" width="600" height="400" title="Deploy Ingress Controller" alt="Deploy Ingress Controller"></a>
 
 B) [DevOps] Publish an Application
 *********************
 
-:kbd:`ToDo`
-https://youtu.be/EN6OWU97ogM
+.. raw:: html
+
+    <a href="http://www.youtube.com/watch?v=EN6OWU97ogM"><img src="http://img.youtube.com/vi/EN6OWU97ogM/0.jpg" width="600" height="400" title="Publish an Application" alt="Publish an Application"></a>
 
 C) [DevOps] Update App's Security level
 *********************
 
-:kbd:`ToDo`
+.. raw:: html
+
+    <a href="http://www.youtube.com/watch?v=SGUMT9Nc5oY"><img src="http://img.youtube.com/vi/SGUMT9Nc5oY/0.jpg" width="600" height="400" title="Update App Security level" alt="Update App Security level"></a>
+
 
 D) [SecOps] Update WAF policy attached to a security level
 *********************
 
-:kbd:`ToDo`
+.. raw:: html
+
+    <a href="http://www.youtube.com/watch?v=9VSrPRACjlc"><img src="http://img.youtube.com/vi/9VSrPRACjlc/0.jpg" width="600" height="400" title="Update WAF policy attached to a security level" alt="Update WAF policy attached to a security level"></a>
 
 E) [SecOps] Fix false positive
 *********************
 
-:kbd:`ToDo`
+.. raw:: html
+
+    <a href="http://www.youtube.com/watch?v=dijN4EGLZpQ"><img src="http://img.youtube.com/vi/dijN4EGLZpQ/0.jpg" width="600" height="400" title="Fix false positive" alt="Fix false positive"></a>
 
 F) [DevOps] Secure published API
 *********************
 
-:kbd:`ToDo`
-
-G) [SecOps] Update signatures
-*********************
-
-:kbd:`ToDo`
-
-- Automate an Application deployment
 .. raw:: html
 
-    <a href="http://www.youtube.com/watch?v=wqIGWfW5Dmo"><img src="http://img.youtube.com/vi/wqIGWfW5Dmo/0.jpg" width="600" height="400" title="Automate an Application deployment" alt="Automate an Application deployment"></a>
+    <a href="http://www.youtube.com/watch?v=VQ1-2tWeaso"><img src="http://img.youtube.com/vi/VQ1-2tWeaso/0.jpg" width="600" height="400" title="Secure published API" alt="Secure published API"></a>
 
 Pre-requisites
 ==============

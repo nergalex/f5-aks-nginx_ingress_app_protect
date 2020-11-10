@@ -1,0 +1,137 @@
+---
+- name: GET Ingress
+  community.kubernetes.k8s_info:
+    kind: Ingress
+    namespace: "{{ extra_app.name }}"
+    name: "{{ extra_app.name }}-ingress-external-master"
+    kubeconfig: "config.yaml"
+    validate_certs: no
+  register: var_resources
+
+- name: SET Ingress LB IP
+  set_fact:
+    var_lb_ip: "{{ var_resources.resources.0.status.loadBalancer.ingress.0.ip }}"
+
+- name: login - retrieve CS ACCESS_TOKEN + REFRESH_TOKEN
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-auth/login"
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: "{{ lookup('template','cs_login.json') }}"
+    body_format: json
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_login
+
+- name: Account details - retrieve CS ACCOUNT_ID
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-account/user"
+    method: GET
+    headers:
+        Accept: application/json
+        Authorization: "Bearer {{cs_login.json.access_token}}"
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_account
+
+- name: GET GSLB subscriptions
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-subscription/subscriptions?account_id={{ cs_account.json.primary_account_id }}&service_type=gslb"
+    method: GET
+    headers:
+        Accept: application/json
+        Authorization: "Bearer {{cs_login.json.access_token}}"
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_subscriptions
+
+- name: INIT var_subscription_id
+  set_fact:
+    var_subscription_id: "none"
+    var_new_lbr: "{{ lookup('template', 'cs_dns_lb_object_lbr.json') }}"
+    var_new_monitor: "{{ lookup('template', 'cs_dns_lb_object_monitor.json') }}"
+    var_new_pool: "{{ lookup('template', 'cs_dns_lb_object_pool.json') }}"
+    var_new_virtual_server: "{{ lookup('template', 'cs_dns_lb_object_vs.json') }}"
+
+- name: SET var_subscription_id
+  set_fact:
+    var_subscription_id: "{{ item.subscription_id }}"
+    var_current_configuration: "{{ item.configuration }}"
+  loop: "{{ cs_subscriptions.json.subscriptions }}"
+  when: item.configuration.gslb_service.zone == extra_app.domain
+
+- name: CREATE Multi-PX GSLB Service
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-subscription/subscriptions"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{cs_login.json.access_token}}"
+    body: "{{ lookup('template', 'cs_dns_lb_create.json') }}"
+    body_format: json
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_subscription_create
+  when: var_subscription_id == 'none'
+
+- name: UPDATE Multi-PX GSLB Service
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-subscription/subscriptions/{{ var_subscription_id }}"
+    method: PUT
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{cs_login.json.access_token}}"
+    body: "{{ lookup('template', 'cs_dns_lb_update.json') }}"
+    body_format: json
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_subscription_update
+  when: var_subscription_id != 'none'
+
+- name: INIT cs_subscription
+  set_fact:
+    cs_subscription: "{{ cs_subscription_create }}"
+  when: cs_subscription_create.skipped is undefined
+
+- name: INIT cs_subscription
+  set_fact:
+    cs_subscription: "{{ cs_subscription_update }}"
+  when: cs_subscription_update.skipped is undefined
+
+- name: Activate GSLB Subscription
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-subscription/subscriptions/{{ cs_subscription.json.subscription_id }}/activate"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cs_login.json.access_token }}"
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_activation
+
+- name: GET GSLB status
+  uri:
+    url: "https://{{ extra_cs.hostname }}/{{ extra_cs.api_version }}/svc-subscription/subscriptions/{{ cs_subscription.json.subscription_id }}/status"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{ cs_login.json.access_token }}"
+    timeout: 60
+    status_code: 200, 202
+    validate_certs: false
+  register: cs_status
+  until: "cs_status.json.service_state == 'DEPLOYED'"
+  retries: 20
+  delay: 15
+
+- debug:
+    var: cs_status.json
+
+...

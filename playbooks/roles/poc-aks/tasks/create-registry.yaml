@@ -1,0 +1,21 @@
+---
+- name: Create an azure container registry
+  delegate_to: localhost
+  azure.azcollection.azure_rm_containerregistry:
+    name: CloudBuilder
+    location: "{{ extra_location }}"
+    resource_group: "rg-{{ extra_platform_name }}"
+    admin_user_enabled: true
+    sku: Basic
+    tags: "{{ extra_platform_tags }} Name=rg-{{ extra_platform_name }} owner=CMS_ansible_tower"
+  register: output
+
+- name: Credentials
+  debug:
+    msg: "
+    login_server: {{ output.login_server }};
+    Username: CloudBuilder;
+    password: {{ output.credentials.password }};
+    password2: {{ output.credentials.password2 }};
+    "
+...

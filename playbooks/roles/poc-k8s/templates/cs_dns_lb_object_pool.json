@@ -1,0 +1,32 @@
+{
+    {%- if 'eu' in extra_app.gslb_location %}
+    "pools_EU_Pool_{{ extra_app.name}}": {
+        "display_name": "EU Pool",
+        "enable": true,
+        "load_balancing_mode": "round-robin",
+        "max_answers": 1,
+        "members": [
+            {
+                "monitor": "monitor_{{ extra_app.name}}",
+                "virtual_server": "ipEndpoints_EU_app_instance_{{ extra_app.name}}"
+            }
+        ],
+        "rr_type": "A",
+        "ttl": 30
+    },
+    {% endif -%}
+    "pools_Global_Pool_{{ extra_app.name}}": {
+        "display_name": "Global Pool",
+        "enable": true,
+        "load_balancing_mode": "round-robin",
+        "max_answers": 1,
+        "members": [
+            {
+                "monitor": "monitor_{{ extra_app.name}}",
+                "virtual_server": "ipEndpoints_Global_app_instance_{{ extra_app.name}}"
+            }
+        ],
+        "rr_type": "A",
+        "ttl": 30
+    }
+}

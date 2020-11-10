@@ -1,0 +1,35 @@
+controller:
+  name: nap-internal-ingress-controller
+  kind: deployment
+  ingressClass: nginx-internal
+  image:
+    repository: "{{ stats_acr_login_server }}/nap-ingress"
+    tag: "{{ stats_nginx_ic_image_tag }}"
+  nginxplus: true
+  appprotect:
+    enable: true
+  replicaCount: 1
+  healthStatus: true
+  healthStatusURI: "/nginx-health"
+  nginxStatus:
+    enable: true
+    port: 8080
+    allowCidrs: "10.0.0.0/8"
+  service:
+    name: ilb-nap-ingress-controller
+    create: true
+    type: LoadBalancer
+    loadBalancerIP: "{{ extra_ilb_ingress_ip }}"
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    externalTrafficPolicy: Local
+    httpPort:
+      enable: true
+      port: 80
+      targetPort: 80
+    httpsPort:
+      enable: true
+      port: 443
+      targetPort: 443
+  rbac:
+    create: true

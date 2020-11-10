@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ extra_app.name }}-ingress-external-minion-{{ item.name }}"
+  namespace: "{{ extra_app.name }}"
+  labels:
+    app: "{{ extra_app.name }}"
+    component: "{{ item.name }}"
+    policy_target: external
+  annotations:
+    kubernetes.io/ingress.class: "nginx-external"
+    nginx.org/mergeable-ingress-type: "minion"
+    appprotect.f5.com/app-protect-policy: "external-ingress-controller/waf-policy-external-api-{{ extra_app.name }}-{{ item.name }}-v{{ var_waf_version }}"
+    nginx.org/location-snippets: |
+{% if item.cache is defined and item.cache == 'enabled' %}
+      proxy_cache global-cache;
+      add_header X-Cache-Status $upstream_cache_status;
+{% endif %}
+
+spec:
+  rules:
+  - host: "{{ extra_app.name }}.{{ extra_app.domain }}"
+    http:
+      paths:
+        - path: "{{ item.location }}"
+          pathType: Prefix
+          backend:
+            serviceName: "{{ item.name }}"
+            servicePort: 80
+
+

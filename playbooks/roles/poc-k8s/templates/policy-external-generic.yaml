@@ -1,0 +1,17 @@
+apiVersion: appprotect.f5.com/v1beta1
+kind: APPolicy
+metadata:
+  name: "waf-policy-external-{{ extra_app.name }}-v{{ var_waf_version }}"
+  namespace: "external-ingress-controller"
+  labels:
+    app: "{{ extra_app.name }}"
+    policy_target: external
+spec:
+  policy:
+{{ lookup('url', url_waf_policy_core, split_lines='False') }}
+{% if extra_app_swagger_url != 'none' %}
+    open-api-files:
+      - link: "{{ extra_app_swagger_url }}"
+{% endif %}
+  modificationReference:
+    link: "{{ url_waf_policy_modifications }}"

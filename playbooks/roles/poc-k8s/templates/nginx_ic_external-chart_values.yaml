@@ -1,0 +1,40 @@
+controller:
+  name: nap-external-ingress-controller
+  kind: deployment
+  ingressClass: nginx-external
+  image:
+    repository: "{{ stats_acr_login_server }}/nap-ingress"
+    tag: "{{ stats_nginx_ic_image_tag }}"
+  nginxplus: true
+  appprotect:
+    enable: true
+  replicaCount: 1
+  healthStatus: true
+  healthStatusURI: "/nginx-health"
+  nginxStatus:
+    enable: true
+    port: 8080
+    allowCidrs: "10.0.0.0/8"
+  service:
+    name: elb-nap-ingress-controller
+    create: true
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    httpPort:
+      enable: true
+      port: 80
+      targetPort: 80
+    httpsPort:
+      enable: true
+      port: 443
+      targetPort: 443
+  wildcardTLS:
+    cert: {{ extra_wildcard_tls_crt | b64encode }}
+    key: {{ extra_wildcard_tls_key | b64encode }}
+  rbac:
+    create: true
+  config:
+    entries:
+      app-protect-cookie-seed: "{{ 1000 | random | to_uuid }}"
+      http-snippets: |
+        proxy_cache_path /var/tmp/global-cache levels=1:2 keys_zone=global-cache:10m max_size=100m inactive=60m use_temp_path=off;

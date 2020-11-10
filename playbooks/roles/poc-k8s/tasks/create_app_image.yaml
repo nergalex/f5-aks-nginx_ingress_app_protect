@@ -1,0 +1,51 @@
+---
+- name: INSTALL package
+  package:
+    name:
+      - python-pip
+
+- name: INSTALL python module
+  pip:
+    name: docker
+
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git source images
+  git:
+    repo: "{{ item.source_image }}"
+    dest: "/root/source_images/{{ item.name }}"
+    force: yes
+  loop: "{{ extra_app.components }}"
+
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: "{{ stats_acr_login_server }}"
+    username: 00000000-0000-0000-0000-000000000000
+    password: "{{ extra_acr_token }}"
+    reauthorize: yes
+
+- name: Build an image and push it to a private repo
+  docker_image:
+    path: "/root/source_images/{{ item.name }}"
+    name: "{{ stats_acr_login_server }}/{{ extra_app.name }}-{{ item.name }}"
+    tag: 1.0.0
+    push: yes
+  loop: "{{ extra_app.components }}"
+
+### CLI equivalent
+#- name: BUILD image
+#  shell: "docker build -f /root/source_images/{{ item.name }}/Dockerfile -t {{ stats_acr_login_server }}/{{ extra_app.name }}-{{ item.name }}:1.0.0 ."
+#  args:
+#    chdir: "/root/source_images/{{ item.name }}"
+#  loop: "{{ extra_app.components }}"
+#
+#- name: PUSH image
+#  shell: "docker login {{ stats_acr_login_server }} -u 00000000-0000-0000-0000-000000000000 -p {{ extra_acr_token }} && docker push {{ stats_acr_login_server }}/{{ extra_app.name }}-{{ item.name }}:1.0.0"
+#  args:
+#    chdir: "/root/source_images/{{ item.name }}"
+#  loop: "{{ extra_app.components }}"
+
+...

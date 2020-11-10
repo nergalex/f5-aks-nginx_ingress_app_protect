@@ -1,0 +1,34 @@
+---
+# https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html
+- name: ADD NGINX charts repository
+  community.kubernetes.helm_repository:
+    repo_name: nginx-stable
+    repo_url: https://helm.nginx.com/stable
+
+- name: DEPLOY External ingress controller using HELM chart
+  community.kubernetes.helm:
+    release_name: external-nginx-plus-ingress
+    release_namespace: external-ingress-controller
+    create_namespace: yes
+    chart_ref: nginx-stable/nginx-ingress
+    release_values: "{{ lookup('template', 'nginx_ic_external-chart_values.yaml') | from_yaml }}"
+    atomic: yes
+    kubeconfig: "config.yaml"
+
+- name: DEPLOY Internal ingress controller using HELM chart
+  community.kubernetes.helm:
+    release_name: internal-nginx-plus-ingress
+    release_namespace: internal-ingress-controller
+    create_namespace: yes
+    chart_ref: nginx-stable/nginx-ingress
+    release_values: "{{ lookup('template', 'nginx_ic_internal-chart_values.yaml') | from_yaml }}"
+    atomic: yes
+    kubeconfig: "config.yaml"
+  register: output
+
+- name: CREATE NAP log format
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', 'logconf-nap.yaml') | from_yaml }}"
+    kubeconfig: "config.yaml"
+
+...
