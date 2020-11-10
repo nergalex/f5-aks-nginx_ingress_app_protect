@@ -353,7 +353,6 @@ Extra variable                                  Description                     
         - name: app2
           location: /api
           source_image: 'https://gitlab.com/arcadia-application/app2.git'
-          swagger_url: none
         - name: app3
           location: /app3
           source_image: 'https://gitlab.com/arcadia-application/app3.git'
