@@ -13,5 +13,5 @@ spec:
     open-api-files:
       - link: "{{ extra_app_swagger_url }}"
 {% endif %}
-  modificationReference:
+  modificationsReference:
     link: "{{ url_waf_policy_modifications }}"
