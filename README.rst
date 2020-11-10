@@ -431,31 +431,26 @@ Get External Ingress Controller PODs:
 
 :kbd:`kubectl describe pod --namespace external-ingress-controller`
 
-
+-----
 View Ingress Controller status (Cache, Zones, Upstream servers) from Jumphost:
 
 :kbd:`http://<Pod_IP>:8080/dashboard.html`
-
 
 Get error logs from an External Ingress Controller POD:
 
 :kbd:`kubectl logs --namespace external-ingress-controller <POD_name>`
 
-
 Launch a shell on an External Ingress Controller POD:
 
 :kbd:`kubectl exec --namespace external-ingress-controller -it <POD_name> sh`
-
 
 View WAF policies for App 'arcadia':
 
 :kbd:`kubectl describe --namespace external-ingress-controller --selector 'app==arcadia' APPolicy`
 
-
 View App's Service:
 
 :kbd:`kubectl get svc --namespace arcadia -owide`
-
 
 View App's Ingress:
 
