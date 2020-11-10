@@ -429,7 +429,7 @@ Troubleshoot
 ==================================================
 Get External Ingress Controller PODs
 
-``kubectl describe pod --namespace external-ingress-controller``
+:kbd:`kubectl describe pod --namespace external-ingress-controller`
 
 View Ingress Controller status (Cache, Zones, Upstream servers) from Jumphost
 
