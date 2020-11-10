@@ -427,7 +427,7 @@ Execute step (C) setting ``extra_app_swagger_url`` value with ``https://raw.gith
 
 G) [SecOps] Update WAF signatures
 ==================================================
-Execute step (A) when a notification/alert is received from `F5 mailing list <https://interact.f5.com/F5-Preference-Center.html>`_
+Execute step (A). In real life, when a notification of update is received from `F5 mailing list <https://interact.f5.com/F5-Preference-Center.html>`_
 
 Troubleshoot
 ==================================================
@@ -461,8 +461,9 @@ View App's Ingress:
 
 Reference
 ==================================================
-- `F5 attack signature info <https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Essential.App.Protect-Details.html#attack-signatures>`_
 - `AWS NGINX eXperience <http://aws.nginx-experience.com>`_
+- `F5 attack signature info <https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Essential.App.Protect-Details.html#attack-signatures>`_
+- `F5 mailing list <https://interact.f5.com/F5-Preference-Center.html>`_
 - `NGINX Ingress Controller - HELM <https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/#configuration>`_
 - `NGINX Ingress Controller - snippet <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-snippets/>`_
 - `NGINX Ingress Controller - App Protect annotation <https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/#app-protect>`_
