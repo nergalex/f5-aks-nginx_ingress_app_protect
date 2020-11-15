@@ -10,7 +10,7 @@ Use Case
 - **Organization** -- Delegate App publication to DevOps and WAF policies to SecOps
 - **Automation** -- Automate use cases:
 
-A) [SecOps] **Deploy Ingress Controller** -- SecOps deploy K8S Ingress with an embedded WAF and wildcard certificate
+A) [DevOps/SecOps] **Deploy Ingress Controller** -- DevOps deploy K8S Ingress with an embedded WAF and wildcard certificate
 B) [DevOps] **Publish an Application** -- DevOps deploy Applications on Ingress (Cache, Content Routing, LB with monitoring) and by selecting a pre-defined security level
 C) [DevOps] **Update App's Security level** -- Regarding risk analysis and new App's features, Product Owner requests an update of App's Security level
 D) [SecOps] **Update WAF policy attached to a security level** -- Threats evolve, SecOps adapt WAF strategy to protect capital assets: applications
