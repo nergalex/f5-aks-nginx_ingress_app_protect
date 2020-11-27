@@ -1,0 +1,110 @@
+---
+- name: Create Resource Group
+  delegate_to: localhost
+  azure_rm_resourcegroup:
+    name: "rg-{{ extra_platform_name }}"
+    location: "{{ extra_location }}"
+    tags: "{{ extra_platform_tags }}  Name=rg-{{ extra_platform_name }} owner={{ owner }}"
+
+- name: Create Virtual Network
+  delegate_to: localhost
+  azure_rm_virtualnetwork:
+    resource_group: "rg-{{ extra_platform_name }}"
+    name: "vnet-{{ extra_platform_name }}"
+    location: "{{ extra_location }}"
+    address_prefixes: "{{ extra_vnet_address_prefixes }}"
+    tags: "{{ extra_platform_tags }} Name=vnet-{{ extra_platform_name }} owner={{ owner }}"
+
+#- name: Create Network Security Group for Internal access
+#  delegate_to: localhost
+#  azure_rm_securitygroup:
+#    resource_group: "rg-{{ extra_platform_name }}"
+#    name: "nsg-{{ extra_platform_name }}-internal"
+#    location: "{{ extra_location }}"
+#    tags: "{{ extra_platform_tags }} Name=nsg-{{ extra_platform_name }}-internal owner={{ owner }}"
+#    rules:
+#      - name: in_allow_all
+#        direction: Inbound
+#        priority: 999
+#        access: Allow
+#      - name: out_allow_all
+#        direction: Outbound
+#        priority: 999
+#        access: Allow
+#
+#- name: Create VRF
+#  delegate_to: localhost
+#  azure_rm_routetable:
+#    resource_group: "rg-{{ extra_platform_name }}"
+#    location: "{{ extra_location }}"
+#    name: "rt-{{ extra_platform_name }}-{{ item }}"
+#    disable_bgp_route_propagation: True
+#    tags: "{{ extra_platform_tags }} Name=rt-{{ extra_platform_name }}-{{ item }} owner={{ owner }}"
+#  loop: "{{ design_common.vrf }}"
+#
+#- name: Add default route via Internet to VRF
+#  delegate_to: localhost
+#  azure_rm_route:
+#    resource_group: "rg-{{ extra_platform_name }}"
+#    route_table_name: "rt-{{ extra_platform_name }}-{{ extra_zone_name }}"
+#    name: 'default_internet'
+#    address_prefix: '0.0.0.0/0'
+#    next_hop_type: 'internet'
+
+- name: Create Subnet Management
+  delegate_to: localhost
+  azure_rm_subnet:
+    resource_group: "rg-{{ extra_platform_name }}"
+    virtual_network: "vnet-{{ extra_platform_name }}"
+    name: "net-{{ extra_platform_name }}-management"
+    address_prefix: "{{ extra_management_subnet_address_prefix }}"
+#    security_group_name: "nsg-{{ extra_platform_name }}-management"
+#    route_table: "rt-{{ extra_platform_name }}-management"
+
+- name: Create Subnet App
+  delegate_to: localhost
+  azure_rm_subnet:
+    resource_group: "rg-{{ extra_platform_name }}"
+    virtual_network: "vnet-{{ extra_platform_name }}"
+    name: "net-{{ extra_platform_name }}-{{ extra_zone_name }}"
+    address_prefix: "{{ extra_zone_subnet_address_prefix }}"
+#    security_group_name: "nsg-{{ extra_platform_name }}-internal"
+#    route_table: "rt-{{ extra_platform_name }}-{{ extra_zone_name }}"
+
+- name: Create vNet peering Spoke -> HUB
+  delegate_to: localhost
+  azure_rm_virtualnetworkpeering:
+    resource_group: "rg-{{ extra_platform_name }}"
+    name: "peering-{{ extra_platform_name }}-HUB"
+    virtual_network: "vnet-{{ extra_platform_name }}"
+    remote_virtual_network:
+      resource_group: "rg-{{ extra_hub_name }}"
+      name: "vnet-{{ extra_hub_name }}"
+    allow_virtual_network_access: true
+    allow_forwarded_traffic: true
+    use_remote_gateways: false
+    allow_gateway_transit: true
+
+- name: Create vNet peering HUB -> Spoke
+  delegate_to: localhost
+  azure_rm_virtualnetworkpeering:
+    resource_group: "rg-{{ extra_hub_name }}"
+    name: "peering-{{ extra_platform_name }}-HUB"
+    virtual_network: "vnet-{{ extra_hub_name }}"
+    remote_virtual_network:
+      resource_group: "rg-{{ extra_platform_name }}"
+      name: "vnet-{{ extra_platform_name }}"
+    allow_virtual_network_access: true
+    allow_forwarded_traffic: true
+    use_remote_gateways: false
+    allow_gateway_transit: true
+
+
+
+
+
+
+
+
+
+
