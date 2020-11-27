@@ -71,38 +71,6 @@
 #    security_group_name: "nsg-{{ extra_platform_name }}-internal"
 #    route_table: "rt-{{ extra_platform_name }}-{{ extra_zone_name }}"
 
-- name: Create vNet peering Spoke -> HUB
-  delegate_to: localhost
-  azure_rm_virtualnetworkpeering:
-    resource_group: "rg-{{ extra_platform_name }}"
-    name: "peering-{{ extra_platform_name }}-HUB"
-    virtual_network: "vnet-{{ extra_platform_name }}"
-    remote_virtual_network:
-      resource_group: "rg-{{ extra_hub_name }}"
-      name: "vnet-{{ extra_hub_name }}"
-    allow_virtual_network_access: true
-    allow_forwarded_traffic: true
-    use_remote_gateways: false
-    allow_gateway_transit: true
-
-- name: Create vNet peering HUB -> Spoke
-  delegate_to: localhost
-  azure_rm_virtualnetworkpeering:
-    resource_group: "rg-{{ extra_hub_name }}"
-    name: "peering-{{ extra_platform_name }}-HUB"
-    virtual_network: "vnet-{{ extra_hub_name }}"
-    remote_virtual_network:
-      resource_group: "rg-{{ extra_platform_name }}"
-      name: "vnet-{{ extra_platform_name }}"
-    allow_virtual_network_access: true
-    allow_forwarded_traffic: true
-    use_remote_gateways: false
-    allow_gateway_transit: true
-
-
-
-
-
 
 
 
