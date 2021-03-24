@@ -134,7 +134,7 @@ virtualenv
 ***************************
 - Create a virtualenv following `this guide <https://docs.ansible.com/ansible-tower/latest/html/upgrade-migration-guide/virtualenv.html>`_
 - In virtualenv, as a prerequisite for Azure collection, install Azure SDK following `this guide <https://github.com/ansible-collections/azure>`_
-- In virtualenv, as a prerequisite for K8S collection, install ``openshift`` following `this guide <https://github.com/ansible-collections/community.kubernetes>`_
+- In virtualenv, as a prerequisite for K8S collection, install ``openshift==0.11.2`` following `this guide <https://github.com/ansible-collections/community.kubernetes>`_
 - In virtualenv, fix an issue during ``openshift`` installation ``google`` package dependency:
 
 .. code:: bash
