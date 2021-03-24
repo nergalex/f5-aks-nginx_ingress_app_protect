@@ -1,0 +1,7 @@
+---
+- name: CREATE NAP log format
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', 'logconf-nap.yaml') | from_yaml }}"
+    kubeconfig: "config.yaml"
+
+...
